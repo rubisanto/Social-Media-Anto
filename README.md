@@ -11,3 +11,5 @@ créer un cluster sur MongoDB Atlas
 le connecter à MongoDb Compass
 
 npm i -s mongoose
+
+npm i -s validator
