@@ -13,3 +13,5 @@ le connecter à MongoDb Compass
 npm i -s mongoose
 
 npm i -s validator
+
+npm i -s bcrypt

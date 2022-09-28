@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 // controle si l'adresse email est valide
 const { isEmail } = require("validator");
+const bcrypt = require("bcrypt");
 
 // schéma d'utilisateur
 const userSchema = new mongoose.Schema(
@@ -48,6 +49,15 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// fonction avant d'enregistrer l'utilisateur
+userSchema.pre("save", async function (next) {
+  // hash le mot de passe
+  const salt = await bcrypt.genSalt();
+  this.password = await bcrypt.hash(this.password, salt);
+  // passer à la suite
+  next();
+});
 
 // exporter le schema en tant que modèle
 const UserModel = mongoose.model("user", userSchema);
