@@ -26,3 +26,31 @@ module.exports.userInfo = (req, res) => {
     else console.log("ID inconnu : " + err);
   }).select("-password");
 };
+
+// export la mise à jour d'un utilisateur
+module.exports.updateUser = async (req, res) => {
+  // si l'id est valide
+  if (!ObjectID.isValid(req.params.id))
+    return res.status(400).send("ID inconnu : " + req.params.id);
+
+  try {
+    // si l'id est valide
+    await UserModel.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $set: {
+          bio: req.body.bio,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    )
+      .then((docs) => res.send(docs))
+      .catch((err) => res.status(500).send({ message: err }));
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+};
