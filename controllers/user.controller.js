@@ -54,3 +54,18 @@ module.exports.updateUser = async (req, res) => {
     return res.status(500).json({ message: err });
   }
 };
+
+// export la suppression d'un utilisateur
+module.exports.deleteUser = async (req, res) => {
+  // si l'id est valide
+  if (!ObjectID.isValid(req.params.id))
+    return res.status(400).send("ID inconnu : " + req.params.id);
+
+  try {
+    // si l'id est valide
+    await UserModel.remove({ _id: req.params.id }).exec();
+    res.status(200).json({ message: "Utilisateur supprimé" });
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+};
