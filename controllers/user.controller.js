@@ -69,3 +69,78 @@ module.exports.deleteUser = async (req, res) => {
     return res.status(500).json({ message: err });
   }
 };
+
+// export le follow d'un utilisateur
+module.exports.follow = async (req, res) => {
+  // si l'id est valide
+  if (
+    !ObjectID.isValid(req.params.id) ||
+    !ObjectID.isValid(req.body.idToFollow)
+  )
+    return res.status(400).send("ID inconnu : " + req.params.id);
+
+  // si l'id est valide
+  try {
+    // ajouter à la liste des followers
+    await UserModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $addToSet: { following: req.body.idToFollow },
+      },
+      { new: true, upsert: true },
+      (err, docs) => {
+        if (!err) res.status(201).json(docs);
+        else return res.status(400).json(err);
+      }
+    );
+    // ajouter à la liste des followings
+    await UserModel.findByIdAndUpdate(
+      req.body.idToFollow,
+      {
+        $addToSet: { followers: req.params.id },
+      },
+      { new: true, upsert: true },
+      (err, docs) => {
+        if (err) return res.status(400).json(err);
+      }
+    );
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+};
+
+// export le unfollow d'un utilisateur
+module.exports.unfollow = async (req, res) => {
+  // si l'id est valide
+  if (!ObjectID.isValid(req.params.id))
+    return res.status(400).send("ID inconnu : " + req.params.id);
+
+  // si l'id est valide
+  try {
+    // retirer de la liste des followers
+    await UserModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $pull: { followers: req.body.id },
+      },
+      { new: true, upsert: true },
+      (err, docs) => {
+        if (!err) res.status(201).json(docs);
+        else return res.status(400).json(err);
+      }
+    );
+    // retirer de la liste des followings
+    await UserModel.findByIdAndUpdate(
+      req.body.id,
+      {
+        $pull: { followings: req.params.id },
+      },
+      { new: true, upsert: true },
+      (err, docs) => {
+        if (err) return res.status(400).json(err);
+      }
+    );
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+};
