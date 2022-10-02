@@ -70,39 +70,34 @@ module.exports.deleteUser = async (req, res) => {
   }
 };
 
-// export le follow d'un utilisateur
 module.exports.follow = async (req, res) => {
-  // si l'id est valide
   if (
     !ObjectID.isValid(req.params.id) ||
     !ObjectID.isValid(req.body.idToFollow)
   )
-    return res.status(400).send("ID inconnu : " + req.params.id);
+    return res.status(400).send("ID unknown : " + req.params.id);
 
-  // si l'id est valide
   try {
-    // ajouter à la liste des followers
+    // add to the follower list
     await UserModel.findByIdAndUpdate(
       req.params.id,
-      {
-        $addToSet: { following: req.body.idToFollow },
-      },
+      { $addToSet: { following: req.body.idToFollow } },
       { new: true, upsert: true },
       (err, docs) => {
-        if (!err) res.status(201).json(docs);
-        else return res.status(400).json(err);
+        // if (!err) res.status(201).json(docs);
+        // if (err) return res.status(400).jsos(err);
       }
-    );
-    // ajouter à la liste des followings
-    await UserModel.findByIdAndUpdate(
-      req.body.idToFollow,
-      {
-        $addToSet: { followers: req.params.id },
-      },
-      { new: true, upsert: true },
-      (err, docs) => {
-        if (err) return res.status(400).json(err);
-      }
+      // pour le moment : utilisation du then, message d'erreur mais fonctionne en bdd
+    ).then(
+      UserModel.findByIdAndUpdate(
+        req.body.idToFollow,
+        { $addToSet: { followers: req.params.id } },
+        { new: true, upsert: true },
+        (err, docs) => {
+          if (!err) res.status(201).json(docs);
+          // if (err) return res.status(400).json(err);
+        }
+      )
     );
   } catch (err) {
     return res.status(500).json({ message: err });
